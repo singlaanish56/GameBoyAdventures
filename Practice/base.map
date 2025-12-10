@@ -1,0 +1,15 @@
+SUMMARY:
+	ROM0: 90 bytes used / 32678 free
+
+ROM0 bank #0:
+	SECTION: $0000-$0007 ($0008 bytes) ["main"]
+	         $0000 = main
+	         $0003 = main.loop
+	SECTION: $0008-$0009 ($0002 bytes) ["sample"]
+	         $0008 = InitSample
+	         $0009 = UpdateSample
+	EMPTY: $000a-$00ff ($00f6 bytes)
+	SECTION: $0100-$014f ($0050 bytes) ["header"]
+	         $0100 = entrypoint
+	EMPTY: $0150-$7fff ($7eb0 bytes)
+	TOTAL EMPTY: $7fa6 bytes

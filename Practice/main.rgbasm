@@ -1,0 +1,26 @@
+include "hardware.rgbinc"
+
+section "header", rom0[$0100]
+entrypoint:
+    di
+    jp main
+    ds ($0150 - @), 0 ; this one defined the number of places to fill with the 0 in the header, as the header takes 80 bytes of data
+
+macro DisableLCD
+ ; wait for the vblank, occurs at 144
+ .wait_vblank\@
+    ld a, [rLY] ; rLy stores the current PPU ins pointer
+    cp a, SCRN_Y ; SCRN_Y has 144 where the vblank starts
+    jr nz, .wait_vblank\@
+
+ ; reset and turn off the LCD
+ xor a ; short name for xor a,a hence a is set to 0
+ ld [rLCDC], a
+endm
+
+section "main", rom0
+main:
+    call InitSample
+    .loop
+        call UpdateSample
+        jr .loop

@@ -1,0 +1,14 @@
+def ROM_HEADER_ADDRESS equ $0100
+def ROM_MAIN_ADDRESS equ $0150
+
+section "header", rom0[ROM_HEADER_ADDRESS] ; the section for $0100 to $0103 is the first 4 bytes read when starting the GBA, hence we do the bare minimum in these limited space
+    di ; disable the interrupts
+    jr main ; jump to the main section
+
+section "main", rom0[ROM_MAIN_ADDRESS]
+main:
+    ld a, 0
+    .loop
+        ld [$C000], a
+        inc a
+        jr .loop ; runs an infinite loop incrementing

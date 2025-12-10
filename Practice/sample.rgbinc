@@ -1,0 +1,42 @@
+include "utils.rgbinc"
+
+def TILES_COUNT   equ (384)
+def BYTES_PER_TILES   equ (16)
+def TILES_BYTES_SIZE   equ (TILES_COUNT * BYTES_PER_TILES)
+def TILEMAP_BYTES_SIZE   equ (1024)
+def GRAPHIC_DATA_SIZE   equ (TILEMAP_BYTES_SIZE + TILES_BYTES_SIZE)
+def GRAPHIC_DATA_ADDRESS_END   equ ($8000)
+def GRAPHIC_DATA_ADDRESS_START   equ (GRAPHIC_DATA_ADDRESS_END - GRAPHIC_DATA_SIZE)
+
+macro LoadGraphicsDataIntoVRAM
+    ld de, GRAPHIC_DATA_ADDRESS_START
+    ld hl, _VRAM8000
+    .load_title\@
+        ld a, [de]
+        inc de
+        ld [hli], a
+        ld a, d
+        cp a, high(GRAPHIC_DATA_ADDRESS_END)
+        jr nz, .load_title\@
+endm
+
+section "sample", rom0
+
+InitSample:
+    LoadGraphicsDataIntoVRAM
+
+    ; turn the LCD on
+    ld a, LCDCF_ON
+    ld [rLCDC], a
+
+    ret
+
+UpdateSample:
+    ret
+
+export InitSample, UpdateSample
+
+
+section "graphics_data", rom0[GRAPHIC_DATA_ADDRESS_START]
+incbin "tileset.chr"
+incbin "background.tlm"
