@@ -4,3 +4,8 @@ def UTILS_RGBINC equ 1
 include "hardware.rgbinc"
 
 endc
+
+macro copy
+    ld a, \2
+    ld \1, a
+endm
