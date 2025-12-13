@@ -2,8 +2,13 @@
 00:0000 main
 00:0000 main.wait_vblank_u1
 00:000e main.loop
-00:0041 InitSample
-00:0056 InitSample.init_oam_u1
-00:0062 InitSample.load_title_u2
-00:0080 UpdateSample
 00:0100 entrypoint
+00:0150 InitSample
+00:0174 InitSample.init_oam_u1
+00:0180 InitSample.load_title_u2
+00:019e UpdateSample
+00:01e7 UpdateSample.left_checked
+00:01f2 UpdateSample.right_checked
+00:01fd UpdateSample.up_checked
+00:0208 UpdateSample.down_checked
+00:0218 UpdateSample.window_toggle_done

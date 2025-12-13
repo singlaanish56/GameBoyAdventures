@@ -17,7 +17,6 @@ def GRAPHIC_DATA_ADDRESS_END   equ ($8000)
 def GRAPHIC_DATA_ADDRESS_START   equ (GRAPHIC_DATA_ADDRESS_END - GRAPHIC_DATA_SIZE)
 
 
-
 macro InitOAM
     ld c, OAM_COUNT ; 40 sprites
     ld hl, _OAMRAM+OAMA_Y ; points to the first y address to the sprite
@@ -41,9 +40,31 @@ macro LoadGraphicsDataIntoVRAM
         jr nz, .load_title\@
 endm
 
+rsset _RAM
+def WRAM_PAD_INPUT rb sizeof_PAD_INPUT
+
+def WRAM_BG_SCX rb 1
+def WRAM_BG_SCY rb 1
+
+def WRAM_WIN_ENABLE_FLAG rb 1
+
+def WRAM_END rb 0
+
+def WRAM_USAGE equ(WRAM_END - _RAM)
+println "WRAM usage : {d:WRAM_USAGE} bytes"
+assert WRAM_USAGE <= $2000, "Too many bytes used in WRAM"
+
+
 section "sample", rom0
 
 InitSample:
+    ;init the WRAM state
+    InitPadInput WRAM_PAD_INPUT
+    xor a
+    ld [WRAM_BG_SCX], a
+    ld [WRAM_BG_SCY], a
+    ld [WRAM_WIN_ENABLE_FLAG], a
+
     ; init the paletter for the background for the dmg
     ld a, %11100100 ; black-dargray-lightgray-white
     ld [rBGP], a
@@ -75,10 +96,49 @@ InitSample:
 UpdateSample:
     halt  ;enters the low power mode, suspends the CPU ins, then works on the interrupts that are enabled
 
+    ; set the bg position
+    copy [rSCX], [WRAM_BG_SCX]
+    copy [rSCY], [WRAM_BG_SCY]
 
-    xor a
-    ld [rSCX], a
-    ld [rSCY], a
+    ; toggle thw window on or off
+    ldh a, [rLCDC]
+    and a, ~LCDCF_WINON
+    ld hl, WRAM_WIN_ENABLE_FLAG
+    or a, [hl]
+    ldh [rLCDC], a
+
+    ;logic for the input  update
+
+    UpdatePadInput WRAM_PAD_INPUT
+
+    ; d pad check
+    TestPadInput_HeldAll WRAM_PAD_INPUT, PADF_LEFT
+    jr nz, .left_checked
+        ld hl, WRAM_BG_SCX
+        dec [hl]
+    .left_checked
+    TestPadInput_HeldAll WRAM_PAD_INPUT, PADF_RIGHT
+    jr nz, .right_checked
+        ld hl, WRAM_BG_SCX
+        inc [hl]
+    .right_checked
+    TestPadInput_HeldAll WRAM_PAD_INPUT, PADF_UP
+    jr nz, .up_checked
+        ld hl, WRAM_BG_SCY
+        dec [hl]
+    .up_checked
+    TestPadInput_HeldAll WRAM_PAD_INPUT, PADF_DOWN
+    jr nz, .down_checked
+        ld hl, WRAM_BG_SCY
+        inc [hl]
+    .down_checked
+    TestPadInput_HeldAll WRAM_PAD_INPUT, PADF_A
+    jr nz, .window_toggle_done
+        ld a, [WRAM_WIN_ENABLE_FLAG]
+        cpl
+        and a, LCDCF_WINON
+        ld [WRAM_WIN_ENABLE_FLAG], a
+    .window_toggle_done
 
 def SPRITE_ADDRESS_0 equ(_OAMRAM)
    copy [SPRITE_ADDRESS_0 + OAMA_X], 16

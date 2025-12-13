@@ -9,3 +9,50 @@ macro copy
     ld a, \2
     ld \1, a
 endm
+
+rsreset
+def PAD_INPUT_CURRENT rb 1 ;high nibble for the d pad and the lower nibble for the buttons
+def sizeof_PAD_INPUT rb 0
+
+macro InitPadInput
+    ld a , $FF
+    ld [\1 + PAD_INPUT_CURRENT], a
+endm
+
+macro UpdatePadInput
+    ; reading the dpad, the multiple tries is for properly capture the values
+    ld a, P1F_GET_DPAD
+    ldh [rP1], a
+    ldh a, [rP1]
+    ldh a, [rP1]
+
+    swap a
+    and a, $F0
+    ld b ,a
+
+    ;read the buttons
+    ld a, P1F_GET_BTN
+    ldh [rP1], a
+    ldh a, [rP1]
+    ldh a, [rP1]
+    ldh a, [rP1]
+    ldh a, [rP1]
+    ldh a, [rP1]
+    ldh a, [rP1]
+
+    ; add the values in the lower nibble in a
+    and a , $0F
+    or a, b
+
+    ; store in the current PAD_INPUT_CURRENT
+    ld [\1 + PAD_INPUT_CURRENT], a
+
+    ;disable input polling
+    ld a, P1F_GET_NONE
+    ldh [rP1],a
+endm
+
+macro TestPadInput_HeldAll
+    ld a, [\1 + PAD_INPUT_CURRENT]
+    and a , \2
+endm
