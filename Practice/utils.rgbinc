@@ -3,8 +3,6 @@ def UTILS_RGBINC equ 1
 
 include "hardware.rgbinc"
 
-endc
-
 macro copy
     ld a, \2
     ld \1, a
@@ -12,14 +10,25 @@ endm
 
 rsreset
 def PAD_INPUT_CURRENT rb 1 ;high nibble for the d pad and the lower nibble for the buttons
+def PAD_INPUT_PREVIOUS rb 1
+def PAD_INPUT_PRESSED rb 1
+def PAD_INPUT_RELEASED rb 1
 def sizeof_PAD_INPUT rb 0
 
 macro InitPadInput
     ld a , $FF
     ld [\1 + PAD_INPUT_CURRENT], a
+    ld [\1 + PAD_INPUT_PREVIOUS], a
+    ld [\1 + PAD_INPUT_PRESSED], a
+    ld [\1 + PAD_INPUT_RELEASED], a
 endm
 
 macro UpdatePadInput
+    ; store the previous pad input from the current
+    ld a, [\1 + PAD_INPUT_CURRENT]
+    ld [\1+PAD_INPUT_PREVIOUS], a
+    ld c, a
+
     ; reading the dpad, the multiple tries is for properly capture the values
     ld a, P1F_GET_DPAD
     ldh [rP1], a
@@ -43,6 +52,7 @@ macro UpdatePadInput
     ; add the values in the lower nibble in a
     and a , $0F
     or a, b
+    ld b, a
 
     ; store in the current PAD_INPUT_CURRENT
     ld [\1 + PAD_INPUT_CURRENT], a
@@ -50,9 +60,37 @@ macro UpdatePadInput
     ;disable input polling
     ld a, P1F_GET_NONE
     ldh [rP1],a
+
+    ; compute and store the pressed buttons , in active low 0 is pressed 1 is released
+    ld a, c
+    cpl
+    or a, b
+    ld [\1+ PAD_INPUT_PRESSED], a
+
+    ; compute and store the releases buttons
+    ld a, b
+    cpl ;invert a
+    or a, c
+    ld [\1+PAD_INPUT_RELEASED], a
+
+
+
 endm
 
 macro TestPadInput_HeldAll
     ld a, [\1 + PAD_INPUT_CURRENT]
     and a , \2
 endm
+
+macro TestPadInput_Pressed
+    ld a, [\1+ PAD_INPUT_PREVIOUS]
+    and a, \2
+endm
+
+macro TestPadInput_Released
+    ld a, [\1+ PAD_INPUT_RELEASED]
+    and a, \2
+endm
+
+
+endc

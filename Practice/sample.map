@@ -1,5 +1,5 @@
 SUMMARY:
-	ROM0: 8533 bytes used / 24235 free
+	ROM0: 8562 bytes used / 24206 free
 
 ROM0 bank #0:
 	SECTION: $0000-$0012 ($0013 bytes) ["main"]
@@ -11,16 +11,16 @@ ROM0 bank #0:
 	EMPTY: $0041-$00ff ($00bf bytes)
 	SECTION: $0100-$014f ($0050 bytes) ["header"]
 	         $0100 = entrypoint
-	SECTION: $0150-$0240 ($00f1 bytes) ["sample"]
+	SECTION: $0150-$025d ($010e bytes) ["sample"]
 	         $0150 = InitSample
-	         $0174 = InitSample.init_oam_u1
-	         $0180 = InitSample.load_title_u2
-	         $019e = UpdateSample
-	         $01e7 = UpdateSample.left_checked
-	         $01f2 = UpdateSample.right_checked
-	         $01fd = UpdateSample.up_checked
-	         $0208 = UpdateSample.down_checked
-	         $0218 = UpdateSample.window_toggle_done
-	EMPTY: $0241-$5fff ($5dbf bytes)
+	         $017d = InitSample.init_oam_u1
+	         $0189 = InitSample.load_title_u2
+	         $01a7 = UpdateSample
+	         $0204 = UpdateSample.left_checked
+	         $020f = UpdateSample.right_checked
+	         $021a = UpdateSample.up_checked
+	         $0225 = UpdateSample.down_checked
+	         $0235 = UpdateSample.window_toggle_done
+	EMPTY: $025e-$5fff ($5da2 bytes)
 	SECTION: $6000-$7fff ($2000 bytes) ["graphics_data"]
-	TOTAL EMPTY: $5eab bytes
+	TOTAL EMPTY: $5e8e bytes
